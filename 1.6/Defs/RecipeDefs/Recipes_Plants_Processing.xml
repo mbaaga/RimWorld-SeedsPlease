@@ -316,14 +316,15 @@
 	<RecipeDef>
 		<defName>RefineBerries</defName>
 		<label>refine berries</label>
-		<description>Refine variety of berries into berries.</description>
+		<description>Refine variety of berries into Strawberries.</description>
 		<jobString>Refining berries.</jobString>
 		<workSpeedStat>CookSpeed</workSpeedStat>
 		<effectWorking>Cook</effectWorking>
 		<workSkill>Cooking</workSkill>
-		<workAmount>5</workAmount>
+		<workAmount>500</workAmount>
 		<descriptionHyperlinks>
 			<ThingDef>RawBerries</ThingDef>
+			<ThingDef>RawStrawberries</ThingDef>
 		</descriptionHyperlinks>
 		<recipeUsers>
 			<li>SeedExtractionSpot</li>
@@ -332,26 +333,21 @@
 		<ingredients>
 			<li>
 				<filter>
-					<categories>
-						<li>UnrefinedBerries</li>
-					</categories>
+					<thingDefs>
+						<li>RawBerries</li>
+					</thingDefs>
 				</filter>
 				<count>8</count>
 			</li>
 		</ingredients>
 		<fixedIngredientFilter>
-			<categories>
-				<li>UnrefinedBerries</li>
-			</categories>
+			<thingDefs>
+				<li>RawBerries</li>
+			</thingDefs>
 		</fixedIngredientFilter>
-		<defaultIngredientFilter>
-			<disallowedCategories>
-				<li>UnrefinedBerries</li>
-			</disallowedCategories>
-		</defaultIngredientFilter>
-		<specialProducts>
-			<li>Butchery</li>
-		</specialProducts>
+		<Products>
+			<RawStrawberries>4</RawStrawberries>
+		</Products>
 		<workerCounterClass>SeedsPleaseLite.RecipeWorkerCounter_ExtractSeeds</workerCounterClass>
 	</RecipeDef>
 
