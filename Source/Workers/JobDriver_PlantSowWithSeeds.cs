@@ -245,7 +245,7 @@ public class JobDriver_PlantSowWithSeeds : JobDriver
             }
         }
 
-        return (plantDefToGrow.CanEverPlantAt(cell, map) && PlantUtility.GrowthSeasonNow(cell, map, true));
+        return (plantDefToGrow.CanEverPlantAt(cell, map) && PlantUtility.GrowthSeasonNow(cell, map, plantDef));
     }
     IPlantToGrowSettable GetPlayerSetPlantForCell(IntVec3 cell, Map map)
     {
