@@ -33,7 +33,7 @@ public class Patch_WorkGiver_GrowerSow_JobOnCell
         }
     }
 
-    public static Job Postfix(Job __result, Pawn pawn, IntVec3 c)
+    public static Job Postfix(Job __result, Pawn pawn, IntVec3 c, bool forced)
     {
         if (__result == null || __result.def != JobDefOf.Sow)
         {
@@ -51,6 +51,9 @@ public class Patch_WorkGiver_GrowerSow_JobOnCell
         {
             return __result;
         }
+
+        if (NeedsToCutFirst(c, map, pawn, forced, ref __result))
+            return __result;
 
         //Predicate filtering the kind of seed allowed
         Predicate<Thing> predicate = tempThing =>
@@ -86,6 +89,59 @@ public class Patch_WorkGiver_GrowerSow_JobOnCell
             }
         }
 
+        return false;
+    }
+
+    static bool NeedsToCutFirst(IntVec3 cell, Map map, Pawn pawn, bool forced, ref Job job)
+    {
+        var zoneCells = cell.GetZone(map)?.cells;
+        if( zoneCells == null )
+            return false;
+        // First check to cut the cell itself.
+        if( zoneCells?.Contains( cell ) ?? false )
+            if( NeedsToCutFirstHelper( cell, map, pawn, forced, ref job ))
+                return true;
+        // Then cells around it.
+        foreach( IntVec3 c in GenAdjFast.AdjacentCells8Way( cell ))
+            if( zoneCells?.Contains( c ) ?? false )
+                if( NeedsToCutFirstHelper( c, map, pawn, forced, ref job ))
+                    return true;
+        // Then check to cut all other cells of the growing zone. This prevents pawns from running
+        // back and forth with seeds to plant one plant at a time if priority of growing is higher
+        // than priority of cutting.
+        foreach( IntVec3 c in zoneCells )
+            if( NeedsToCutFirstHelper( c, map, pawn, forced, ref job ))
+                return true;
+        return false;
+    }
+
+    static bool NeedsToCutFirstHelper(IntVec3 cell, Map map, Pawn pawn, bool forced, ref Job job)
+    {
+        if (!cell.InBounds(map))
+            return false;
+        // This is pretty much a copy&paste of the JobDefOf.CutPlant part of WorkGiver_GrowerSow.JobOnCell().
+        Plant plant = cell.GetPlant(map);
+        if (plant != null)
+        {
+            if( plant.def == job.plantDefToSow )
+                return false;
+            if (!pawn.CanReserve(plant, 1, -1, null, forced) || plant.IsForbidden(pawn))
+                return false;
+            Zone_Growing zone_Growing = cell.GetZone(map) as Zone_Growing;
+            if (zone_Growing != null && !zone_Growing.allowCut)
+                return false;
+            if (!forced && plant.TryGetComp<CompPlantPreventCutting>(out var comp) && comp.PreventCutting)
+                return false;
+            if (!PlantUtility.PawnWillingToCutPlant_Job(plant, pawn))
+                return false;
+            Job cutJob = JobMaker.MakeJob(JobDefOf.CutPlant, plant);
+            if (cutJob.MakeDriver(pawn).TryMakePreToilReservations(false))
+            {
+                pawn.ClearReservationsForJob(cutJob);
+                job = cutJob;
+                return true;
+            }
+        }
         return false;
     }
 }
