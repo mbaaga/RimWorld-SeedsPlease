@@ -316,7 +316,7 @@
 	<RecipeDef>
 		<defName>RefineBerries</defName>
 		<label>refine berries</label>
-		<description>Refine variety of berries into Strawberries.</description>
+		<description>Refine variety of berries into strawberries.</description>
 		<jobString>Refining berries.</jobString>
 		<workSpeedStat>CookSpeed</workSpeedStat>
 		<effectWorking>Cook</effectWorking>
