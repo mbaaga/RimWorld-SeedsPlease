@@ -101,7 +101,7 @@ public class Patch_WorkGiver_GrowerSow_JobOnCell
     {
         if (!cell.InBounds(map))
             return false;
-        if(PlantUtility.SnowAllowsPlanting(cell, map))
+        if(PlantUtility.SnowAllowsPlanting(cell, map) && PlantUtility.SandAllowsPlanting(cell, map))
             return false;
         Job clearSnowJob = JobMaker.MakeJob(JobDefOf.ClearSnow, cell);
         if (clearSnowJob.MakeDriver(pawn).TryMakePreToilReservations(false))
