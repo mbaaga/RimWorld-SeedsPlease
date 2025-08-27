@@ -345,9 +345,9 @@
 				<li>RawBerries</li>
 			</thingDefs>
 		</fixedIngredientFilter>
-		<Products>
+		<products>
 			<RawStrawberries>4</RawStrawberries>
-		</Products>
+		</products>
 		<workerCounterClass>SeedsPleaseLite.RecipeWorkerCounter_ExtractSeeds</workerCounterClass>
 	</RecipeDef>
 
