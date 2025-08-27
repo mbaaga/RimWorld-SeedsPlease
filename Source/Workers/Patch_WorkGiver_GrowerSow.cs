@@ -47,12 +47,12 @@ public class Patch_WorkGiver_GrowerSow_JobOnCell
         }
 
         Map map = pawn.Map;
-        if (ModSettings_SeedsPleaseLiteRedux.clearSnow && NeedsToClearSnowFirst(c, map, pawn, ref __result))
+        if (ModSettings_SeedsPleaseLiteRedux.clearSnow && NeedsToDoActionFirst(c, map, pawn, forced, ref __result, NeedsToClearSnowFirstAction))
         {
             return __result;
         }
 
-        if (NeedsToCutFirst(c, map, pawn, forced, ref __result))
+        if (NeedsToDoActionFirst(c, map, pawn, forced, ref __result, NeedsToCutFirstAction))
             return __result;
 
         //Predicate filtering the kind of seed allowed
@@ -72,50 +72,48 @@ public class Patch_WorkGiver_GrowerSow_JobOnCell
         };
     }
 
-    static bool NeedsToClearSnowFirst(IntVec3 cell, Map map, Pawn pawn, ref Job job)
-    {
-        var zoneCells = cell.GetZone(map)?.cells;
-        if (!PlantUtility.SnowAllowsPlanting(cell, map))
-        {
-            for (int i = zoneCells?.Count ?? 0; i-- > 0;)
-            {
-                Job clearSnowJob = JobMaker.MakeJob(JobDefOf.ClearSnow, cell);
-                if (clearSnowJob.MakeDriver(pawn).TryMakePreToilReservations(false))
-                {
-                    pawn.ClearReservationsForJob(clearSnowJob);
-                    job = clearSnowJob;
-                    return true;
-                }
-            }
-        }
+    private delegate bool NeedAction(IntVec3 cell, Map map, Pawn pawn, bool forced, ref Job job);
 
-        return false;
-    }
-
-    static bool NeedsToCutFirst(IntVec3 cell, Map map, Pawn pawn, bool forced, ref Job job)
+    static bool NeedsToDoActionFirst(IntVec3 cell, Map map, Pawn pawn, bool forced, ref Job job, NeedAction action)
     {
         var zoneCells = cell.GetZone(map)?.cells;
         if( zoneCells == null )
             return false;
-        // First check to cut the cell itself.
+        // First check the cell itself.
         if( zoneCells?.Contains( cell ) ?? false )
-            if( NeedsToCutFirstHelper( cell, map, pawn, forced, ref job ))
+            if( action( cell, map, pawn, forced, ref job ))
                 return true;
         // Then cells around it.
         foreach( IntVec3 c in GenAdjFast.AdjacentCells8Way( cell ))
             if( zoneCells?.Contains( c ) ?? false )
-                if( NeedsToCutFirstHelper( c, map, pawn, forced, ref job ))
+                if( action( c, map, pawn, forced, ref job ))
                     return true;
-        // Then check to cut all other cells of the growing zone. This prevents pawns from running
+        // Then check all other cells of the growing zone. This prevents pawns from running
         // back and forth with seeds to plant one plant at a time if priority of growing is higher
-        // than priority of cutting.
+        // than priority of cutting (or clearing snow).
         foreach( IntVec3 c in zoneCells )
-            if( NeedsToCutFirstHelper( c, map, pawn, forced, ref job ))
+            if( action( c, map, pawn, forced, ref job ))
                 return true;
         return false;
     }
 
-    static bool NeedsToCutFirstHelper(IntVec3 cell, Map map, Pawn pawn, bool forced, ref Job job)
+    static bool NeedsToClearSnowFirstAction(IntVec3 cell, Map map, Pawn pawn, bool forced, ref Job job)
+    {
+        if (!cell.InBounds(map))
+            return false;
+        if(PlantUtility.SnowAllowsPlanting(cell, map))
+            return false;
+        Job clearSnowJob = JobMaker.MakeJob(JobDefOf.ClearSnow, cell);
+        if (clearSnowJob.MakeDriver(pawn).TryMakePreToilReservations(false))
+        {
+            pawn.ClearReservationsForJob(clearSnowJob);
+            job = clearSnowJob;
+            return true;
+        }
+        return false;
+    }
+
+    static bool NeedsToCutFirstAction(IntVec3 cell, Map map, Pawn pawn, bool forced, ref Job job)
     {
         if (!cell.InBounds(map))
             return false;
