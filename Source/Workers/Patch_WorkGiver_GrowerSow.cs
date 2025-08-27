@@ -83,6 +83,9 @@ public class Patch_WorkGiver_GrowerSow_JobOnCell
         if( zoneCells?.Contains( cell ) ?? false )
             if( action( cell, map, pawn, forced, ref job ))
                 return true;
+        // If action on the given cell is forced, then do not first create a job for other cells.
+        if( forced )
+            return false;
         // Then cells around it.
         foreach( IntVec3 c in GenAdjFast.AdjacentCells8Way( cell ))
             if( zoneCells?.Contains( c ) ?? false )
