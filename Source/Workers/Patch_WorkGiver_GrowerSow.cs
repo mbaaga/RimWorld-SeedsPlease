@@ -33,7 +33,7 @@ public class Patch_WorkGiver_GrowerSow_JobOnCell
         }
     }
 
-    public static Job Postfix(Job __result, Pawn pawn, IntVec3 c)
+    public static Job Postfix(Job __result, Pawn pawn, IntVec3 c, bool forced)
     {
         if (__result == null || __result.def != JobDefOf.Sow)
         {
@@ -47,10 +47,13 @@ public class Patch_WorkGiver_GrowerSow_JobOnCell
         }
 
         Map map = pawn.Map;
-        if (ModSettings_SeedsPleaseLiteRedux.clearSnow && NeedsToClearSnowFirst(c, map, pawn, ref __result))
+        if (ModSettings_SeedsPleaseLiteRedux.clearSnow && NeedsToDoActionFirst(c, map, pawn, forced, ref __result, NeedsToClearSnowFirstAction))
         {
             return __result;
         }
+
+        if (NeedsToDoActionFirst(c, map, pawn, forced, ref __result, NeedsToCutFirstAction))
+            return __result;
 
         //Predicate filtering the kind of seed allowed
         Predicate<Thing> predicate = tempThing =>
@@ -69,23 +72,77 @@ public class Patch_WorkGiver_GrowerSow_JobOnCell
         };
     }
 
-    static bool NeedsToClearSnowFirst(IntVec3 cell, Map map, Pawn pawn, ref Job job)
+    private delegate bool NeedAction(IntVec3 cell, Map map, Pawn pawn, bool forced, ref Job job);
+
+    static bool NeedsToDoActionFirst(IntVec3 cell, Map map, Pawn pawn, bool forced, ref Job job, NeedAction action)
     {
         var zoneCells = cell.GetZone(map)?.cells;
-        if (!PlantUtility.SnowAllowsPlanting(cell, map))
-        {
-            for (int i = zoneCells?.Count ?? 0; i-- > 0;)
-            {
-                Job clearSnowJob = JobMaker.MakeJob(JobDefOf.ClearSnow, cell);
-                if (clearSnowJob.MakeDriver(pawn).TryMakePreToilReservations(false))
-                {
-                    pawn.ClearReservationsForJob(clearSnowJob);
-                    job = clearSnowJob;
+        if( zoneCells == null )
+            return false;
+        // First check the cell itself.
+        if( zoneCells?.Contains( cell ) ?? false )
+            if( action( cell, map, pawn, forced, ref job ))
+                return true;
+        // If action on the given cell is forced, then do not first create a job for other cells.
+        if( forced )
+            return false;
+        // Then cells around it.
+        foreach( IntVec3 c in GenAdjFast.AdjacentCells8Way( cell ))
+            if( zoneCells?.Contains( c ) ?? false )
+                if( action( c, map, pawn, forced, ref job ))
                     return true;
-                }
+        // Then check all other cells of the growing zone. This prevents pawns from running
+        // back and forth with seeds to plant one plant at a time if priority of growing is higher
+        // than priority of cutting (or clearing snow).
+        foreach( IntVec3 c in zoneCells )
+            if( action( c, map, pawn, forced, ref job ))
+                return true;
+        return false;
+    }
+
+    static bool NeedsToClearSnowFirstAction(IntVec3 cell, Map map, Pawn pawn, bool forced, ref Job job)
+    {
+        if (!cell.InBounds(map))
+            return false;
+        if(PlantUtility.SnowAllowsPlanting(cell, map) && PlantUtility.SandAllowsPlanting(cell, map))
+            return false;
+        Job clearSnowJob = JobMaker.MakeJob(JobDefOf.ClearSnow, cell);
+        if (clearSnowJob.MakeDriver(pawn).TryMakePreToilReservations(false))
+        {
+            pawn.ClearReservationsForJob(clearSnowJob);
+            job = clearSnowJob;
+            return true;
+        }
+        return false;
+    }
+
+    static bool NeedsToCutFirstAction(IntVec3 cell, Map map, Pawn pawn, bool forced, ref Job job)
+    {
+        if (!cell.InBounds(map))
+            return false;
+        // This is pretty much a copy&paste of the JobDefOf.CutPlant part of WorkGiver_GrowerSow.JobOnCell().
+        Plant plant = cell.GetPlant(map);
+        if (plant != null)
+        {
+            if( plant.def == job.plantDefToSow )
+                return false;
+            if (!pawn.CanReserve(plant, 1, -1, null, forced) || plant.IsForbidden(pawn))
+                return false;
+            Zone_Growing zone_Growing = cell.GetZone(map) as Zone_Growing;
+            if (zone_Growing != null && !zone_Growing.allowCut)
+                return false;
+            if (!forced && plant.TryGetComp<CompPlantPreventCutting>(out var comp) && comp.PreventCutting)
+                return false;
+            if (!PlantUtility.PawnWillingToCutPlant_Job(plant, pawn))
+                return false;
+            Job cutJob = JobMaker.MakeJob(JobDefOf.CutPlant, plant);
+            if (cutJob.MakeDriver(pawn).TryMakePreToilReservations(false))
+            {
+                pawn.ClearReservationsForJob(cutJob);
+                job = cutJob;
+                return true;
             }
         }
-
         return false;
     }
 }
