@@ -7,6 +7,7 @@ Applied changes:
 - Growing zone UI source change: added a `See all plants` toggle gizmo for growing zones and plant growers. When enabled, the plant selector no longer hides plants merely because no seeds are currently in stock; sowing still requires seeds.
 - Seed extraction bill source change: added an `Add seed extraction bill` gizmo to the seed processing bench/spot. It opens a menu of seed-extractable produce currently in stock, marks entries whose matching bill already exists, creates correctly filtered missing bills, sets repeat mode to `Do until X`, sets the target count and ingredient search radius from mod settings, and labels the bill after the output seed.
 - Seed extraction bulk bill source change: added an `Add missing seed extraction bills` gizmo and a matching menu option to create all missing seed extraction bills for produce currently in stock.
+- Seed extraction gizmo icons: added two RimWorld-style command textures for adding one seed extraction bill and adding all missing seed extraction bills.
 - Mod options source change: added defaults for quick seed-extraction bill target count and ingredient search radius.
 - Fixed one malformed French translation XML tag.
 

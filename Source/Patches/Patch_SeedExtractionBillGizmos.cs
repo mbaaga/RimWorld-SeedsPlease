@@ -6,12 +6,16 @@ using System.Reflection;
 using System.Linq;
 using HarmonyLib;
 using RimWorld;
+using UnityEngine;
 using Verse;
 using static SeedsPleaseLite.ResourceBank;
 
 [HarmonyPatch(typeof(Building), nameof(Building.GetGizmos))]
 public static class Patch_Building_GetGizmos
 {
+	private static readonly Texture2D add_bill_icon = ContentFinder<Texture2D>.Get("UI/Commands/SPL_AddSeedExtractionBill", true);
+	private static readonly Texture2D add_missing_bills_icon = ContentFinder<Texture2D>.Get("UI/Commands/SPL_AddMissingSeedExtractionBills", true);
+
 	public static IEnumerable<Gizmo> Postfix(IEnumerable<Gizmo> __result, Building __instance)
 	{
 		foreach (Gizmo value in __result)
@@ -27,6 +31,7 @@ public static class Patch_Building_GetGizmos
 		yield return new Command_Action
 		{
 			defaultLabel = "SPL.Bill.AddSeedExtractionBill".Translate(),
+			icon = add_bill_icon,
 			defaultDesc = "SPL.Bill.AddSeedExtractionBill.Desc".Translate(
 				ModSettings_SeedsPleaseLiteRedux.seedExtractionBillTargetCount,
 				ModSettings_SeedsPleaseLiteRedux.seedExtractionBillSearchRadius.ToString("0")),
@@ -36,6 +41,7 @@ public static class Patch_Building_GetGizmos
 		yield return new Command_Action
 		{
 			defaultLabel = "SPL.Bill.AddMissingSeedExtractionBills".Translate(),
+			icon = add_missing_bills_icon,
 			defaultDesc = "SPL.Bill.AddMissingSeedExtractionBills.Desc".Translate(
 				GetMissingProduce(table).Count(),
 				ModSettings_SeedsPleaseLiteRedux.seedExtractionBillTargetCount,
