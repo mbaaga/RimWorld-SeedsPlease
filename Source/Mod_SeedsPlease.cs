@@ -1,4 +1,4 @@
-﻿namespace SeedsPleaseLite;
+namespace SeedsPleaseLite;
 
 using HarmonyLib;
 using Verse;
@@ -39,6 +39,14 @@ public class Mod_SeedsPlease : Mod
         options.CheckboxLabeled("SPL.Settings.ClearSnow".Translate(), ref ModSettings_SeedsPleaseLiteRedux.clearSnow, "SPL.Settings.ClearSnow.Desc".Translate());
 
         options.CheckboxLabeled("SPL.Settings.EdibleSeeds".Translate(), ref ModSettings_SeedsPleaseLiteRedux.edibleSeeds, "SPL.Settings.EdibleSeeds.Desc".Translate());
+
+        options.CheckboxLabeled("SPL.Settings.ShowAllPlantsInGrowMenu".Translate(), ref ModSettings_SeedsPleaseLiteRedux.showAllPlantsInGrowMenu, "SPL.Settings.ShowAllPlantsInGrowMenu.Desc".Translate());
+
+        options.Label("SPL.Settings.SeedExtractionBillTargetCount".Translate(ModSettings_SeedsPleaseLiteRedux.seedExtractionBillTargetCount), -1f, "SPL.Settings.SeedExtractionBillTargetCount.Desc".Translate());
+        ModSettings_SeedsPleaseLiteRedux.seedExtractionBillTargetCount = Mathf.RoundToInt(options.Slider(ModSettings_SeedsPleaseLiteRedux.seedExtractionBillTargetCount, 1f, 1000f));
+
+        options.Label("SPL.Settings.SeedExtractionBillSearchRadius".Translate(ModSettings_SeedsPleaseLiteRedux.seedExtractionBillSearchRadius.ToString("0")), -1f, "SPL.Settings.SeedExtractionBillSearchRadius.Desc".Translate());
+        ModSettings_SeedsPleaseLiteRedux.seedExtractionBillSearchRadius = Mathf.Round(options.Slider(ModSettings_SeedsPleaseLiteRedux.seedExtractionBillSearchRadius, 3f, 999f));
 
         //============
 
