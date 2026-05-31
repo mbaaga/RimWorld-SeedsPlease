@@ -42,13 +42,9 @@
 
 	<SPL.Bill.AddSeedExtractionBill>Add seed extraction bill</SPL.Bill.AddSeedExtractionBill>
 	<SPL.Bill.AddSeedExtractionBill.Desc>Create a correctly filtered seed extraction bill for produce currently in stock. New bills use Do until {0} and ingredient search radius {1}.</SPL.Bill.AddSeedExtractionBill.Desc>
-	<SPL.Bill.AddSeedExtractionBill.Option>{0} → {1} ({2} in stock)</SPL.Bill.AddSeedExtractionBill.Option>
-	<SPL.Bill.AddSeedExtractionBill.Option.Missing>&lt;color=#77dd77&gt;[missing]&lt;/color&gt; {0} → {1} ({2} in stock)</SPL.Bill.AddSeedExtractionBill.Option.Missing>
-	<SPL.Bill.AddSeedExtractionBill.Option.Existing>&lt;color=#aaaaaa&gt;[exists]&lt;/color&gt; {0} → {1} ({2} in stock)</SPL.Bill.AddSeedExtractionBill.Option.Existing>
+	<SPL.Bill.AddSeedExtractionBill.Option>{0} ({1}/{2} {3})</SPL.Bill.AddSeedExtractionBill.Option>
 	<SPL.Bill.AddMissingSeedExtractionBills>Add missing seed extraction bills</SPL.Bill.AddMissingSeedExtractionBills>
 	<SPL.Bill.AddMissingSeedExtractionBills.Desc>Create all missing seed extraction bills for produce currently in stock. Missing bills: {0}. New bills use Do until {1} and ingredient search radius {2}.</SPL.Bill.AddMissingSeedExtractionBills.Desc>
-	<SPL.Bill.AddMissingSeedExtractionBills.Option>Add all missing bills ({0})</SPL.Bill.AddMissingSeedExtractionBills.Option>
-	<SPL.Bill.AllSeedExtractionBillsAlreadyExist>All seed extraction bills for produce in stock already exist</SPL.Bill.AllSeedExtractionBillsAlreadyExist>
 	<SPL.Bill.NoSeedExtractableProduceInStock>No seed-extractable produce in stock</SPL.Bill.NoSeedExtractableProduceInStock>
 	<SPL.Bill.NoMissingSeedExtractionBills>No missing seed extraction bills for produce in stock</SPL.Bill.NoMissingSeedExtractionBills>
 	<SPL.Bill.ExtractSeedsLabel>extract {0}</SPL.Bill.ExtractSeedsLabel>

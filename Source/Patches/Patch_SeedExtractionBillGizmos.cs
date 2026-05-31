@@ -66,17 +66,6 @@ public static class Patch_Building_GetGizmos
 			return;
 		}
 
-		int missing_count = produce_defs.Count(produce_def => !BillExistsForProduce(table, produce_def));
-
-		if (missing_count > 0)
-		{
-			options.Add(new FloatMenuOption("SPL.Bill.AddMissingSeedExtractionBills.Option".Translate(missing_count), () => AddMissingBills(table)));
-		}
-		else
-		{
-			options.Add(new FloatMenuOption("SPL.Bill.AllSeedExtractionBillsAlreadyExist".Translate(), null));
-		}
-
 		foreach (ThingDef produce_def in produce_defs)
 		{
 			options.Add(CreateMenuOption(table, produce_def));
@@ -89,14 +78,19 @@ public static class Patch_Building_GetGizmos
 	{
 		ThingDef seed_def = GetSeedDef(produce_def);
 		bool has_bill = BillExistsForProduce(table, produce_def);
-		int stock_count = table.Map.resourceCounter.GetCount(produce_def);
-		string label_key = has_bill
-			? "SPL.Bill.AddSeedExtractionBill.Option.Existing"
-			: "SPL.Bill.AddSeedExtractionBill.Option.Missing";
-		string label = label_key.Translate(produce_def.LabelCap, seed_def?.LabelCap ?? "?", stock_count);
+		int produce_stock_count = table.Map.resourceCounter.GetCount(produce_def);
+		int seed_stock_count = seed_def == null ? 0 : table.Map.resourceCounter.GetCount(seed_def);
+		string bill_status = has_bill
+			? "<color=#77dd77>✓</color>"
+			: "<color=#ff6666>×</color>";
+		string label = "SPL.Bill.AddSeedExtractionBill.Option".Translate(
+			produce_def.LabelCap,
+			produce_stock_count,
+			seed_stock_count,
+			bill_status);
 		Action action = () => AddBill(table, produce_def);
 
-		return new FloatMenuOption(label, action);
+		return new FloatMenuOption(label, action, produce_def);
 	}
 
 	private static IEnumerable<ThingDef> GetProduceInStock(Map map)
