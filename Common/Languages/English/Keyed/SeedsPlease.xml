@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <LanguageData>
 	<HarvestMultiplier>Multiplier for yield</HarvestMultiplier>
 	<SeedMultiplier>Multiplier for seeds</SeedMultiplier>
@@ -27,6 +27,29 @@
 	
 	<SPL.Settings.EdibleSeeds>Edible seeds</SPL.Settings.EdibleSeeds>
 	<SPL.Settings.EdibleSeeds.Desc>If enabled, seeds can be eaten by any animal that would eat hay.\n\nChanging this requires a game restart to rebuild the seed database.</SPL.Settings.EdibleSeeds.Desc>
+
+	<SPL.Settings.ShowAllPlantsInGrowMenu>Show all plants in growing zone UI</SPL.Settings.ShowAllPlantsInGrowMenu>
+	<SPL.Settings.ShowAllPlantsInGrowMenu.Desc>If enabled, grow-zone plant selection ignores seed stock and shows every plant RimWorld normally allows here. Sowing still requires seeds.</SPL.Settings.ShowAllPlantsInGrowMenu.Desc>
+
+	<SPL.Settings.SeedExtractionBillTargetCount>Seed extraction bill target count: {0}</SPL.Settings.SeedExtractionBillTargetCount>
+	<SPL.Settings.SeedExtractionBillTargetCount.Desc>Default Do until X target for seed extraction bills created by the quick-add bill button.</SPL.Settings.SeedExtractionBillTargetCount.Desc>
+
+	<SPL.Settings.SeedExtractionBillSearchRadius>Seed extraction bill ingredient search radius: {0}</SPL.Settings.SeedExtractionBillSearchRadius>
+	<SPL.Settings.SeedExtractionBillSearchRadius.Desc>Default ingredient search radius for seed extraction bills created by the quick-add bill button.</SPL.Settings.SeedExtractionBillSearchRadius.Desc>
+
+	<SPL.GrowZone.ShowAllPlants>See all plants</SPL.GrowZone.ShowAllPlants>
+	<SPL.GrowZone.ShowAllPlants.Desc>Show plants in the plant selector even if no matching seeds are currently in stock. Sowing still requires seeds.</SPL.GrowZone.ShowAllPlants.Desc>
+
+	<SPL.Bill.AddSeedExtractionBill>Add seed extraction bill</SPL.Bill.AddSeedExtractionBill>
+	<SPL.Bill.AddSeedExtractionBill.Desc>Create a correctly filtered seed extraction bill for produce currently in stock. New bills use Do until {0} and ingredient search radius {1}.</SPL.Bill.AddSeedExtractionBill.Desc>
+	<SPL.Bill.AddSeedExtractionBill.Option>{0} ({1}/{2} {3})</SPL.Bill.AddSeedExtractionBill.Option>
+	<SPL.Bill.AddMissingSeedExtractionBills>Add missing seed extraction bills</SPL.Bill.AddMissingSeedExtractionBills>
+	<SPL.Bill.AddMissingSeedExtractionBills.Desc>Create all missing seed extraction bills for produce currently in stock. Missing bills: {0}. New bills use Do until {1} and ingredient search radius {2}.</SPL.Bill.AddMissingSeedExtractionBills.Desc>
+	<SPL.Bill.NoSeedExtractableProduceInStock>No seed-extractable produce in stock</SPL.Bill.NoSeedExtractableProduceInStock>
+	<SPL.Bill.NoMissingSeedExtractionBills>No missing seed extraction bills for produce in stock</SPL.Bill.NoMissingSeedExtractionBills>
+	<SPL.Bill.ExtractSeedsLabel>extract {0}</SPL.Bill.ExtractSeedsLabel>
+	<SPL.Bill.SeedExtractionBillAdded>Added bill: {0}</SPL.Bill.SeedExtractionBillAdded>
+	<SPL.Bill.SeedExtractionBillsAdded>Added {0} seed extraction bills</SPL.Bill.SeedExtractionBillsAdded>
 
 	<SPL.Settings.ReloadNeeded>The game will need to be reloaded in order to reprocess the def detabase for the adding/removing of seeds.</SPL.Settings.ReloadNeeded>
 	<SPL.Settings.ReloadNeededHeader>Reload needed</SPL.Settings.ReloadNeededHeader>

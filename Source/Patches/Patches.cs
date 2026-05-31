@@ -60,6 +60,11 @@ static class Patch_IsPlantAvailable
 {
     public static bool Postfix(bool __result, ThingDef plantDef, Map map)
     {
+        if (ModSettings_SeedsPleaseLiteRedux.showAllPlantsInGrowMenu)
+        {
+            return __result;
+        }
+
         if (__result && (plantDef?.blueprintDef?.HasModExtension<Seed>() ?? false))
         {
             return map.listerThings.ThingsOfDef(plantDef.blueprintDef).Count > 0;
