@@ -1,5 +1,6 @@
 namespace SeedsPleaseLite;
 
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
@@ -31,6 +32,16 @@ public static class Patch_Building_GetGizmos
 				ModSettings_SeedsPleaseLiteRedux.seedExtractionBillSearchRadius.ToString("0")),
 			action = () => ShowBillMenu(table)
 		};
+
+		yield return new Command_Action
+		{
+			defaultLabel = "SPL.Bill.AddMissingSeedExtractionBills".Translate(),
+			defaultDesc = "SPL.Bill.AddMissingSeedExtractionBills.Desc".Translate(
+				GetMissingProduce(table).Count(),
+				ModSettings_SeedsPleaseLiteRedux.seedExtractionBillTargetCount,
+				ModSettings_SeedsPleaseLiteRedux.seedExtractionBillSearchRadius.ToString("0")),
+			action = () => AddMissingBills(table)
+		};
 	}
 
 	private static bool IsSeedExtractionTable(Building_WorkTable table)
@@ -40,13 +51,30 @@ public static class Patch_Building_GetGizmos
 
 	private static void ShowBillMenu(Building_WorkTable table)
 	{
-		List<FloatMenuOption> options = GetProduceInStock(table.Map)
-			.Select(produce_def => CreateMenuOption(table, produce_def))
-			.ToList();
+		List<ThingDef> produce_defs = GetProduceInStock(table.Map).ToList();
+		List<FloatMenuOption> options = new List<FloatMenuOption>();
 
-		if (options.Count == 0)
+		if (produce_defs.Count == 0)
 		{
 			options.Add(new FloatMenuOption("SPL.Bill.NoSeedExtractableProduceInStock".Translate(), null));
+			Find.WindowStack.Add(new FloatMenu(options));
+			return;
+		}
+
+		int missing_count = produce_defs.Count(produce_def => !BillExistsForProduce(table, produce_def));
+
+		if (missing_count > 0)
+		{
+			options.Add(new FloatMenuOption("SPL.Bill.AddMissingSeedExtractionBills.Option".Translate(missing_count), () => AddMissingBills(table)));
+		}
+		else
+		{
+			options.Add(new FloatMenuOption("SPL.Bill.AllSeedExtractionBillsAlreadyExist".Translate(), null));
+		}
+
+		foreach (ThingDef produce_def in produce_defs)
+		{
+			options.Add(CreateMenuOption(table, produce_def));
 		}
 
 		Find.WindowStack.Add(new FloatMenu(options));
@@ -55,9 +83,15 @@ public static class Patch_Building_GetGizmos
 	private static FloatMenuOption CreateMenuOption(Building_WorkTable table, ThingDef produce_def)
 	{
 		ThingDef seed_def = GetSeedDef(produce_def);
+		bool has_bill = BillExistsForProduce(table, produce_def);
 		int stock_count = table.Map.resourceCounter.GetCount(produce_def);
-		string label = "SPL.Bill.AddSeedExtractionBill.Option".Translate(produce_def.LabelCap, seed_def?.LabelCap ?? "?", stock_count);
-		return new FloatMenuOption(label, () => AddBill(table, produce_def));
+		string label_key = has_bill
+			? "SPL.Bill.AddSeedExtractionBill.Option.Existing"
+			: "SPL.Bill.AddSeedExtractionBill.Option.Missing";
+		string label = label_key.Translate(produce_def.LabelCap, seed_def?.LabelCap ?? "?", stock_count);
+		Action action = () => AddBill(table, produce_def);
+
+		return new FloatMenuOption(label, action);
 	}
 
 	private static IEnumerable<ThingDef> GetProduceInStock(Map map)
@@ -66,6 +100,24 @@ public static class Patch_Building_GetGizmos
 			.Where(produce_def => map.resourceCounter.GetCount(produce_def) > 0)
 			.Where(produce_def => GetSeedDef(produce_def) != null)
 			.OrderBy(produce_def => produce_def.label);
+	}
+
+	private static IEnumerable<ThingDef> GetMissingProduce(Building_WorkTable table)
+	{
+		return GetProduceInStock(table.Map)
+			.Where(produce_def => !BillExistsForProduce(table, produce_def));
+	}
+
+	private static bool BillExistsForProduce(Building_WorkTable table, ThingDef produce_def)
+	{
+		if (table?.BillStack?.Bills == null || produce_def == null)
+		{
+			return false;
+		}
+
+		return table.BillStack.Bills
+			.OfType<Bill_Production>()
+			.Any(bill => bill.recipe == Defs.ExtractSeeds && bill.ingredientFilter.Allows(produce_def));
 	}
 
 	private static ThingDef GetSeedDef(ThingDef produce_def)
@@ -85,7 +137,25 @@ public static class Patch_Building_GetGizmos
 		label_field?.SetValue(bill, label);
 	}
 
-	private static void AddBill(Building_WorkTable table, ThingDef produce_def)
+	private static void AddMissingBills(Building_WorkTable table)
+	{
+		List<ThingDef> missing_produce_defs = GetMissingProduce(table).ToList();
+
+		if (missing_produce_defs.Count == 0)
+		{
+			Messages.Message("SPL.Bill.NoMissingSeedExtractionBills".Translate(), table, MessageTypeDefOf.NeutralEvent, false);
+			return;
+		}
+
+		foreach (ThingDef produce_def in missing_produce_defs)
+		{
+			AddBill(table, produce_def, false);
+		}
+
+		Messages.Message("SPL.Bill.SeedExtractionBillsAdded".Translate(missing_produce_defs.Count), table, MessageTypeDefOf.PositiveEvent, false);
+	}
+
+	private static void AddBill(Building_WorkTable table, ThingDef produce_def, bool show_message = true)
 	{
 		Bill_Production bill = (Bill_Production)Defs.ExtractSeeds.MakeNewBill();
 		ThingDef seed_def = GetSeedDef(produce_def);
@@ -98,6 +168,10 @@ public static class Patch_Building_GetGizmos
 		SetBillLabel(bill, "SPL.Bill.ExtractSeedsLabel".Translate(seed_def?.label ?? produce_def.label));
 
 		table.BillStack.AddBill(bill);
-		Messages.Message("SPL.Bill.SeedExtractionBillAdded".Translate(bill.LabelCap), table, MessageTypeDefOf.PositiveEvent, false);
+
+		if (show_message)
+		{
+			Messages.Message("SPL.Bill.SeedExtractionBillAdded".Translate(bill.LabelCap), table, MessageTypeDefOf.PositiveEvent, false);
+		}
 	}
 }
